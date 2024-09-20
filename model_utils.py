@@ -95,6 +95,8 @@ def opp2rgb(opp):
 def norm_image_np(img):
     img_min = np.min(img)
     img_max = np.max(img)
+    if (img_max == img_min):
+        return img
     return (img - img_min) / (img_max - img_min)
 
 

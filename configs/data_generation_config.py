@@ -8,8 +8,8 @@ visual_field_resolution = (radius*2, radius*2)
 h, w = visual_field_resolution
 scene_resolution = (200, 200)  # of the whole scene
 scene_h, scene_w = scene_resolution
-input_path = '/RG/rg-tsur/shyahia/tiny_ImageNet'  # a folder of images of any size
+input_path = '/RG/rg-tsur/shyahia/1000_ImageNet'  # a folder of images of any size
 # a folder for all generated output (for model input)
-output_path = '/RG/rg-tsur/shyahia/created_dataset'
+output_path = '/RG/rg-tsur/shyahia/created_dataset_1000'
 step_size = (1/120.0) * 1e6
-hdf5_path = '/RG/rg-tsur/shyahia/dataset_tiny_2.hdf5'
+hdf5_path = '/RG/rg-tsur/shyahia/dataset_tiny_1000.hdf5'

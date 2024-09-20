@@ -23,6 +23,9 @@ from skimage.draw import line
 import h5py
 import shutil
 import tables
+import datetime
+from concurrent.futures import ProcessPoolExecutor
+import multiprocessing
 
 
 def crop_center(img, crop_x, crop_y):
@@ -389,35 +392,7 @@ def prepare_dataset(input_directory, output_directory, num_of_saccades, resume=T
                     continue
 
 
-def create_hdf5_dataset(dataset_path, hdf5_path, num_of_saccades):
-    image_names = [d for d in os.listdir(
-        dataset_path) if os.path.isdir(os.path.join(dataset_path, d))]
-    max_event_frames_in_saccade = 100
-
-    with h5py.File(hdf5_path, 'w') as hf:
-        # Create empty resizable datasets in HDF5 file
-        hf.create_dataset('scenes', shape=(0, scene_h, scene_w, 3),
-                          maxshape=(None, scene_h, scene_w, 3), dtype='uint8')
-        hf.create_dataset('saccades', shape=(0, num_of_saccades+1, h, w, 3),
-                          maxshape=(None,  num_of_saccades+1, h, w, 3), dtype='uint8')
-        hf.create_dataset('simple_event_frames', shape=(0, num_of_saccades, max_event_frames_in_saccade, h, w), maxshape=(
-            None, num_of_saccades, max_event_frames_in_saccade, h, w), dtype='int16')
-        hf.create_dataset('points', shape=(0, num_of_saccades, max_event_frames_in_saccade, 2), maxshape=(
-            None, num_of_saccades, max_event_frames_in_saccade, 2), dtype='uint16')
-        hf.create_dataset('gaze_points', shape=(0, num_of_saccades+1, 2), maxshape=(
-            None, num_of_saccades+1, 2), dtype='uint16')
-        hf.create_dataset('num_of_event_frames', shape=(
-            0, num_of_saccades), maxshape=(None, num_of_saccades), dtype='uint8')
-
-    scenes = []
-    saccades = []
-    simple_event_frames = []
-    points = []
-    gaze_points = []
-    num_of_event_frames = []
-
-    # Process each file in the names list
-    for counterino, name in enumerate(image_names):
+def process_image(dataset_path, name, max_event_frames_in_saccade):
         try:
             # Check if both required files (events.h5 and points.h5) exist for the current name
             events_path = os.path.join(dataset_path, name, 'v2e/events.h5')
@@ -539,62 +514,157 @@ def create_hdf5_dataset(dataset_path, hdf5_path, num_of_saccades):
 
                     new_points.append(np.array(saccade_points))
                     pointCount.append(len(saccade_points))
-
-                # Store the final results for this iteration
-                scenes.append(np.array(this_img))
-                simple_event_frames.append(np.array(this_simple_event_frames))
-                num_of_event_frames.append(pointCount)
-                gaze_points.append(np.array(this_gaze_points))
-                points.append(np.array(new_points))
-                saccades.append(np_this_saccades)
-
-                # Close the events file
                 tbl.close()
+                # Store the final results for this iteration
+                this_img= np.array(this_img)
+                this_simple_event_frames = np.array(this_simple_event_frames)
+                pointCount = np.array(pointCount)
+                this_gaze_points = np.array(this_gaze_points)
+                new_points = np.array(new_points)
+                
+                print(f"finsihed processing image {name}")
+                return this_img, this_simple_event_frames, pointCount, this_gaze_points, new_points, np_this_saccades
+                # Close the events file
 
-                # Increment counter and stop if it exceeds the limit
-                counterino += 1
+        except Exception as e:
+            print(f"Error processing image {name}: {e}")
+            return    
 
-                # Append processed data to the HDF5 file
-                with h5py.File(hdf5_path, 'a') as hf:
-                    file_size_before = os.path.getsize(hdf5_path)
-                    print(
-                        f"File size before appending data: {file_size_before / (1024 * 1024):.2f} MB")
 
-                    # Resize datasets to accommodate new data
-                    hf['scenes'].resize((hf['scenes'].shape[0] + 1), axis=0)
-                    hf['scenes'][-1] = this_img
+def process_images_in_parallel(dataset_path, image_names, max_event_frames_in_saccade, num_cores):
+    with multiprocessing.Pool(num_cores) as pool:
+        results = pool.starmap(process_image, [(dataset_path, name, max_event_frames_in_saccade) for name in image_names])
+    return results
 
-                    hf['saccades'].resize(
-                        (hf['saccades'].shape[0] + 1), axis=0)
-                    hf['saccades'][-1] = np_this_saccades
+def create_hdf5_dataset(dataset_path, hdf5_path, num_of_saccades):
+    image_names = [d for d in os.listdir(
+        dataset_path) if os.path.isdir(os.path.join(dataset_path, d))]
 
-                    hf['simple_event_frames'].resize(
-                        (hf['simple_event_frames'].shape[0] + 1), axis=0)
-                    hf['simple_event_frames'][-1] = np.array(
-                        this_simple_event_frames)
 
-                    hf['points'].resize((hf['points'].shape[0] + 1), axis=0)
-                    hf['points'][-1] = np.array(new_points)
 
-                    hf['gaze_points'].resize(
-                        (hf['gaze_points'].shape[0] + 1), axis=0)
-                    hf['gaze_points'][-1] = this_gaze_points
+    max_event_frames_in_saccade = 0
+    frames_in_saccade = 0
+    frames_in_saccade_lst = []
+    for name in image_names:
+        try:
+            points_path = os.path.join(dataset_path, name, 'points.h5')
+            if os.path.exists(points_path):
+                with h5py.File(points_path, 'r') as h5f:
+                    this_points = h5f['points'][:]
+                    this_gaze_points = h5f['gaze_points'][:]
+                # check number of points in a single saccade and find max
+                for saccade_count in range(num_of_saccades+1):
+                    while (True):
+                        if (this_points[frames_in_saccade] == this_gaze_points[saccade_count]).all():
+                            frames_in_saccade_lst.append(frames_in_saccade)
+                            if frames_in_saccade > max_event_frames_in_saccade:
+                                max_event_frames_in_saccade = frames_in_saccade
+                            frames_in_saccade = 0
+                            break
 
-                    hf['num_of_event_frames'].resize(
-                        (hf['num_of_event_frames'].shape[0] + 1), axis=0)
-                    hf['num_of_event_frames'][-1] = pointCount
-
-                print(f"Processed {counterino}/{len(image_names)} images.")
+                        else:
+                            frames_in_saccade += 1
         except Exception as e:
             print(f"Error processing image {name}: {e}")
             continue
 
-    print("Incremental HDF5 dataset creation complete.")
+
+    # add date to hdf5_path and add next number if name exists.
+    current_date = datetime.datetime.now().strftime("%d_%m_%y")
+    hdf5_path = f"{hdf5_path.split('.')[0]}_{current_date}.hdf5"
+    if os.path.exists(hdf5_path):
+        i = 1
+        while True:
+            new_hdf5_path = f"{hdf5_path.split('.')[0]}_{i}.hdf5"
+            if not os.path.exists(new_hdf5_path):
+                hdf5_path = new_hdf5_path
+                break
+            i += 1
+
+
+    with h5py.File(hdf5_path, 'w') as hf:
+        # Create empty resizable datasets in HDF5 file
+        hf.create_dataset('scenes', shape=(0, scene_h, scene_w, 3),
+                          maxshape=(None, scene_h, scene_w, 3), dtype='uint8')
+        hf.create_dataset('saccades', shape=(0, num_of_saccades+1, h, w, 3),
+                          maxshape=(None,  num_of_saccades+1, h, w, 3), dtype='uint8')
+        hf.create_dataset('simple_event_frames', shape=(0, num_of_saccades, max_event_frames_in_saccade, h, w), maxshape=(
+            None, num_of_saccades, max_event_frames_in_saccade, h, w), dtype='int16')
+        hf.create_dataset('points', shape=(0, num_of_saccades, max_event_frames_in_saccade, 2), maxshape=(
+            None, num_of_saccades, max_event_frames_in_saccade, 2), dtype='uint16')
+        hf.create_dataset('gaze_points', shape=(0, num_of_saccades+1, 2), maxshape=(
+            None, num_of_saccades+1, 2), dtype='uint16')
+        hf.create_dataset('num_of_event_frames', shape=(
+            0, num_of_saccades), maxshape=(None, num_of_saccades), dtype='uint8')
+
+    #                 if len(this_points[saccade_count])>max_frames_in_saccade:
+    #                     max_frames_in_saccade=len(this_points[saccade_count])
+    #                 if (this_points[frameCount] == this_gaze_points[saccadeCount + 1]).all():
+    #                     if len(this_points[i])>max_frames_in_saccade:
+    #                         max_frames_in_saccade=len(this_points[i])
+    
+
+
+
+    
+    
+    num_cores = multiprocessing.cpu_count()
+    results = process_images_in_parallel(dataset_path, image_names, max_event_frames_in_saccade, num_cores)# Collect all results before writing
+    scenes = []
+    saccades = []
+    simple_event_frames = []
+    points = []
+    gaze_points = []
+    num_of_event_frames = []
+
+    results = process_images_in_parallel(dataset_path, image_names, max_event_frames_in_saccade, num_cores)
+
+    for result in results:
+        if result is not None:
+            this_img, this_simple_event_frames, pointCount, this_gaze_points, new_points, np_this_saccades = result
+
+            # Collect data in lists
+            scenes.append(this_img)
+            saccades.append(np_this_saccades)
+            simple_event_frames.append(this_simple_event_frames)
+            points.append(new_points)
+            gaze_points.append(this_gaze_points)
+            num_of_event_frames.append(pointCount)
+
+    # Write to HDF5 in one go
+    with h5py.File(hdf5_path, 'a') as hf:
+
+        # Convert lists to numpy arrays
+        scenes = np.array(scenes)
+        saccades = np.array(saccades)
+        simple_event_frames = np.array(simple_event_frames)
+        points = np.array(points)
+        gaze_points = np.array(gaze_points)
+        num_of_event_frames = np.array(num_of_event_frames)
+
+        # Resize and append datasets in bulk
+        hf['scenes'].resize((hf['scenes'].shape[0] + scenes.shape[0]), axis=0)
+        hf['scenes'][-scenes.shape[0]:] = scenes
+
+        hf['saccades'].resize((hf['saccades'].shape[0] + saccades.shape[0]), axis=0)
+        hf['saccades'][-saccades.shape[0]:] = saccades
+
+        hf['simple_event_frames'].resize((hf['simple_event_frames'].shape[0] + simple_event_frames.shape[0]), axis=0)
+        hf['simple_event_frames'][-simple_event_frames.shape[0]:] = simple_event_frames
+
+        hf['points'].resize((hf['points'].shape[0] + points.shape[0]), axis=0)
+        hf['points'][-points.shape[0]:] = points
+
+        hf['gaze_points'].resize((hf['gaze_points'].shape[0] + gaze_points.shape[0]), axis=0)
+        hf['gaze_points'][-gaze_points.shape[0]:] = gaze_points
+
+        hf['num_of_event_frames'].resize((hf['num_of_event_frames'].shape[0] + num_of_event_frames.shape[0]), axis=0)
+        hf['num_of_event_frames'][-num_of_event_frames.shape[0]:] = num_of_event_frames
 
 
 def main():
-    # prepare_dataset(input_directory=input_path,
-    #                 output_directory=output_path, num_of_saccades=num_of_saccades, resume=False)
+    prepare_dataset(input_directory=input_path,
+                     output_directory=output_path, num_of_saccades=num_of_saccades, resume=False)
     create_hdf5_dataset(output_path, hdf5_path, num_of_saccades)
 
 
