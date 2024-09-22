@@ -26,6 +26,7 @@ import tables
 import datetime
 from concurrent.futures import ProcessPoolExecutor
 import multiprocessing
+import argparse
 
 
 def crop_center(img, crop_x, crop_y):
@@ -663,9 +664,28 @@ def create_hdf5_dataset(dataset_path, hdf5_path, num_of_saccades):
 
 
 def main():
-    prepare_dataset(input_directory=input_path,
-                     output_directory=output_path, num_of_saccades=num_of_saccades, resume=False)
-    create_hdf5_dataset(output_path, hdf5_path, num_of_saccades)
+    """
+    Main function for data generation.
+    args.data_generation_config.py contains the configuration for data generation.
+    
+    Args:
+        --prepate_dataset: If provided, prepares dataset from a folder of images.
+        --resume: If provided, resumes from a previous run.
+        --create_hdf5: If provided, creates a hdf5 file from a prepared dataset.
+
+    Returns:
+        None
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--prepate_dataset', action='store_true', help="Prepare dataset from a folder of images")
+    parser.add_argument('--resume', action='store_true', help="Resume from a previous run")
+    parser.add_argument('--create_hdf5',  action='store_true', help="From a prepared dataset, create a hdf5 file")
+    args = parser.parse_args()
+    if args.prepate_dataset:
+        prepare_dataset(input_directory=input_path,
+                     output_directory=output_path, num_of_saccades=num_of_saccades, resume=args.resume)
+    if args.create_hdf5:
+        create_hdf5_dataset(output_path, hdf5_path, num_of_saccades)
 
 
 if __name__ == "__main__":
