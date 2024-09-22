@@ -1,6 +1,6 @@
 # SaccadicVision
 
-# README: Image Reconstruction from Retinal Inputs
+# Image Reconstruction from Retinal Inputs
 
 This README provides instructions on how to use `data_generation.py` and `main.py` to create simulated retinal data and train a network to reconstruct colorful images using these incomplete and color-lacking retinal inputs.
 
