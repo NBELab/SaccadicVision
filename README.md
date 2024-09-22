@@ -6,26 +6,23 @@
 This repository contains the code and models for the SaccadicVision project, part of my M.Sc. thesis titled "Reconstruction of Visually Stable Perception from Saccadic Retinal Inputs Using Corollary Discharge Signals-Driven ConvLSTM Neural Networks". This project was also published at the CogSci conference.
 
 The project focuses on reconstructing visually stable perceptions from saccadic retinal inputs by leveraging corollary discharge signals using a convolutional long short-term memory (ConvLSTM) neural network. This work models how biological systems stabilize visual perception during rapid eye movements (saccades).
-# Reconstruction of Visually Stable Perception Using Corollary Discharge Signals-Driven ConvLSTM Neural Networks
 
-This repository contains the code and models for the SaccadicVision project, part of my M.Sc. thesis titled "Reconstruction of Visually Stable Perception from Saccadic Retinal Inputs Using Corollary Discharge Signals-Driven ConvLSTM Neural Networks". This project was also published at the CogSci conference.
-
-The project focuses on reconstructing visually stable perceptions from saccadic retinal inputs by leveraging corollary discharge signals using a convolutional long short-term memory (ConvLSTM) neural network. This work models how biological systems stabilize visual perception during rapid eye movements (saccades).
 
 ## Project Overview
 - Thesis Title: Reconstruction of Visually Stable Perception from Saccadic Retinal Inputs Using Corollary Discharge Signals-Driven ConvLSTM Neural Networks
-- Published: Cognitive Science Conference (CogSci)
+- Published: [Cognitive Science Conference (CogSci 2024)](https://nbel-lab.com/s/2024-Showgan-et-al.pdf)
 - Field: Computational Neuroscience, Neural Networks, Vision Science
 - Technologies Used: TensorFlow, Keras, ConvLSTM
-- GitHub Repository: NBELab/SaccadicVision
+- GitHub Repository: [NBELab/SaccadicVision](https://github.com/NBELab/SaccadicVision/)
 
 ## Core Contributions:
+- Generation of simulated saccadic retinal input with corrolary discharge signals from simple images.
 - Developed a ConvLSTM-based neural network to process saccadic retinal inputs and corollary discharge signals, emulating biological mechanisms that stabilize visual perception during eye movements.
 - The model reconstructs full-color images from limited, simulated retinal inputs by utilizing intensity frames and color channels in opponent process (OPP) form.
 - Corollary discharge signals provide information about eye movements, which helps the system maintain a stable perception of the visual scene.
 
 ## Dataset & Inputs:
-- The input consists of simulated saccadic retinal images and corresponding event data.
+- The model input consists of simulated saccadic retinal images and corresponding event data.
 - The neural network uses both saccadic image data and motion-related event information to reconstruct a stable, full-color visual scene.
 
 
