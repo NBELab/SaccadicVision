@@ -1,0 +1,89 @@
+
+*** arguments:
+auto_timestamp_resolution:	False
+avi_frame_rate:	30
+batch_size:	8
+crop:	None
+cs_lambda_pixels:	None
+cs_tau_p_ms:	None
+cutoff_hz:	0.0
+ddd_output:	False
+disable_slomo:	True
+dvs1024:	False
+dvs128:	True
+dvs240:	False
+dvs346:	False
+dvs640:	False
+dvs_aedat2:	None
+dvs_aedat4:	None
+dvs_emulator_seed:	0
+dvs_exposure:	['duration', '.033']
+dvs_h5:	events.h5
+dvs_params:	None
+dvs_text:	None
+dvs_vid:	dvs-video.avi
+dvs_vid_full_scale:	2
+hdr:	False
+input:	/RG/rg-tsur/shyahia/created_dataset/ILSVRC2012_test_00000457/ILSVRC2012_test_00000457.avi
+input_frame_rate:	120.0
+input_slowmotion_factor:	1.0
+label_signal_noise:	False
+leak_jitter_fraction:	0.1
+leak_rate_hz:	0.0
+neg_thres:	0.2
+no_preview:	True
+noise_rate_cov_decades:	0.1
+output_folder:	/RG/rg-tsur/shyahia/created_dataset/ILSVRC2012_test_00000457/v2e
+output_height:	None
+output_in_place:	False
+output_width:	None
+overwrite:	True
+photoreceptor_noise:	False
+pos_thres:	0.2
+record_single_pixel_states:	None
+refractory_period:	0.0005
+save_dvs_model_state:	False
+scidvs:	False
+shot_noise_rate_hz:	0.0
+show_dvs_model_state:	None
+sigma_thres:	0.02
+skip_video_output:	False
+slomo_model:	/home/shyahia/ImageReconstructionFromRetinalInputs/v2e/input/SuperSloMo39.ckpt
+slomo_stats_plot:	False
+start_time:	None
+stop_time:	None
+synthetic_input:	None
+timestamp_resolution:	None
+unique_output_folder:	False
+vid_orig:	video_orig.avi
+vid_slomo:	video_slomo.avi
+
+*** command line:
+ /home/shyahia/myenv/bin/v2e -i /RG/rg-tsur/shyahia/created_dataset/ILSVRC2012_test_00000457/ILSVRC2012_test_00000457.avi -o /RG/rg-tsur/shyahia/created_dataset/ILSVRC2012_test_00000457/v2e --overwrite --unique_output_folder false --dvs_h5 events.h5 --dvs_aedat2 None --dvs_text None --no_preview --dvs_exposure duration .033 --input_frame_rate 120 --input_slowmotion_factor 1 --disable_slomo --auto_timestamp_resolution false --pos_thres 0.2 --neg_thres 0.2 --sigma_thres 0.02 --cutoff_hz 0 --leak_rate_hz 0 --shot_noise_rate_hz 0 --dvs1282024-09-08 22:18:01,921 - v2e - [1;34mINFO[1;0m - opening video input file /RG/rg-tsur/shyahia/created_dataset/ILSVRC2012_test_00000457/ILSVRC2012_test_00000457.avi
+2024-09-08 22:18:01,923 - v2e - [1;34mINFO[1;0m - Input video frame rate 120.0Hz is overridden by command line argument --input_frame_rate=120.0
+2024-09-08 22:18:01,923 - v2e - [1;31mWARNING[1;0m - slomo interpolation disabled by command line option; output DVS timestamps will have source frame interval resolution
+2024-09-08 22:18:01,923 - v2e - [1;34mINFO[1;0m - 
+ events will have timestamp resolution 8.33ms,
+2024-09-08 22:18:01,923 - v2e - [1;34mINFO[1;0m - Source video /RG/rg-tsur/shyahia/created_dataset/ILSVRC2012_test_00000457/ILSVRC2012_test_00000457.avi has total 174 frames with total duration 1.44s. 
+Source video is 120fps with slowmotion_factor 1 (frame interval 8.33ms),
+Will convert 174 frames 0 to 173
+(From 0.0s to 1.4416666666666667s, duration 1.4416666666666667s)
+2024-09-08 22:18:01,923 - v2e - [1;34mINFO[1;0m - v2e DVS video will have constant-duration frames 
+at 30.30fps (accumulation time 33ms), 
+DVS video will have 43 frames with duration 1.42s and playback duration 1.43s
+
+2024-09-08 22:18:01,944 - v2e - [1;34mINFO[1;0m - processing frames 0 to 173 from video input
+2024-09-08 22:18:01,945 - v2e - [1;34mINFO[1;0m - Input video /RG/rg-tsur/shyahia/created_dataset/ILSVRC2012_test_00000457/ILSVRC2012_test_00000457.avi has W=128 x H=128 frames each with 3 channels
+2024-09-08 22:18:01,945 - v2e - [1;34mINFO[1;0m - *** Stage 1/3: Resizing 174 input frames to output size (with possible RGB to luma conversion)
+2024-09-08 22:18:01,947 - v2e - [1;34mINFO[1;0m - 
+Converting input frames from RGB color to luma
+2024-09-08 22:18:01,999 - v2e - [1;34mINFO[1;0m - *** Stage 2/3:turning npy frame files to png from /tmp/tmpqdtsuzmm
+2024-09-08 22:18:02,095 - v2e - [1;34mINFO[1;0m - *** Stage 3/3: emulating DVS events from 174 frames
+2024-09-08 22:18:16,397 - v2e - [1;34mINFO[1;0m - generated total 2.96M events (1.48M on, 1.49M off)
+2024-09-08 22:18:16,398 - v2e - [1;34mINFO[1;0m - Avg event rate for N=16384 px and total time =1.442 s
+	Total: 2.06MHz (1.03MHz on, 1.03MHz off)
+	Per pixel:  125.52Hz (62.57Hz on, 62.95Hz off)
+2024-09-08 22:18:16,398 - v2e - [1;34mINFO[1;0m - showing /RG/rg-tsur/shyahia/created_dataset/ILSVRC2012_test_00000457/v2e in desktop
+2024-09-08 22:18:16,404 - v2e - [1;31mWARNING[1;0m - Desktop 'None' not supported (neither DESKTOP_LAUNCH nor os.startfile could be used): could not open /RG/rg-tsur/shyahia/created_dataset/ILSVRC2012_test_00000457/v2e in desktop
+2024-09-08 22:18:16,405 - v2e - [1;34mINFO[1;0m - done processing 348 frames in 14.48s (24.04fr/s)
+ **************** see output folder /RG/rg-tsur/shyahia/created_dataset/ILSVRC2012_test_00000457/v2e
