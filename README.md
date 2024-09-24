@@ -8,6 +8,9 @@ This repository contains the code and models for the SaccadicVision project, par
 The project focuses on reconstructing visually stable perceptions from saccadic retinal inputs by leveraging corollary discharge signals using a convolutional long short-term memory (ConvLSTM) neural network. This work models how biological systems stabilize visual perception during rapid eye movements (saccades).
 
 
+![Model](./images/Model.png)
+
+
 ## Project Overview
 - Thesis Title: Reconstruction of Visually Stable Perception from Saccadic Retinal Inputs Using Corollary Discharge Signals-Driven ConvLSTM Neural Networks
 - Published: [Cognitive Science Conference (CogSci 2024)](https://nbel-lab.com/s/2024-Showgan-et-al.pdf)
@@ -26,10 +29,17 @@ The project focuses on reconstructing visually stable perceptions from saccadic 
 - The neural network uses both saccadic image data and motion-related event information to reconstruct a stable, full-color visual scene.
 
 
+<center>
+
+![Input Generation](./images/Input.png){ width=80% }
+
+</center>
+
+
 
 ### Prerequisites
 Before getting started, ensure that you have the following installed:
-- Python 3.x
+- Python 3.10.X
 - Required Python packages (specified in `requirements.txt`)
 
 
