@@ -29,9 +29,9 @@ The project focuses on reconstructing visually stable perceptions from saccadic 
 - The neural network uses both saccadic image data and motion-related event information to reconstruct a stable, full-color visual scene.
 
 
-<center>
+<div align="center">
   <img src="./images/Input.png" alt="Input Generation" width="80%">
-</center>
+</div>
 
 
 
