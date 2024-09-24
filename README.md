@@ -30,9 +30,7 @@ The project focuses on reconstructing visually stable perceptions from saccadic 
 
 
 <center>
-
-![Input Generation](./images/Input.png){ width=80% }
-
+  <img src="./images/Input.png" alt="Input Generation" width="80%">
 </center>
 
 
